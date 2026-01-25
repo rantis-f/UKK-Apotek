@@ -9,7 +9,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-
   const authHeader = request.headers.get("Authorization");
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -20,7 +19,18 @@ export async function middleware(request: NextRequest) {
   }
 
   const token = authHeader.split(" ")[1];
-  const secret = new TextEncoder().encode(process.env.JWT_SECRET || "rahasia-negara");
+
+  const jwtSecret = process.env.JWT_SECRET;
+
+  if (!jwtSecret) {
+      console.error("❌ FATAL: JWT_SECRET belum di-setting di file .env!");
+      return NextResponse.json(
+          { success: false, message: "Server Error: Konfigurasi keamanan belum lengkap." },
+          { status: 500 }
+      );
+  }
+
+  const secret = new TextEncoder().encode(jwtSecret);
 
   try {
     const { payload } = await jwtVerify(token, secret);

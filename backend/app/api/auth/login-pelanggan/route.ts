@@ -7,6 +7,14 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { email, katakunci } = body;
 
+        const jwtSecret = process.env.JWT_SECRET;
+
+        if (!jwtSecret) {
+            throw new Error("JWT_SECRET belum di-setting di file .env");
+        }
+
+        const secret = new TextEncoder().encode(jwtSecret);
+
         if (!email || !katakunci) {
             return NextResponse.json(
                 { success: false, message: "Email dan Katakunci wajib diisi!" },
@@ -14,6 +22,7 @@ export async function POST(request: Request) {
             );
         }
 
+        // 4. Cari di Database
         const pelanggan = await prisma.pelanggan.findUnique({
             where: { email: email },
         });
@@ -32,7 +41,6 @@ export async function POST(request: Request) {
             );
         }
 
-        const secret = new TextEncoder().encode(process.env.JWT_SECRET || "rahasia-negara");
         const token = await new SignJWT({
             id: pelanggan.id.toString(),
             role: "pelanggan",
@@ -53,10 +61,10 @@ export async function POST(request: Request) {
             },
         });
 
-    } catch (error) {
-        console.error("Login Pelanggan Error:", error);
+    } catch (error: any) {
+        console.error("Login Pelanggan Error:", error.message);
         return NextResponse.json(
-            { success: false, message: "Terjadi kesalahan server" },
+            { success: false, message: error.message || "Terjadi kesalahan server" },
             { status: 500 }
         );
     }
