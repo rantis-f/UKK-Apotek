@@ -12,7 +12,8 @@ import {
   LogOut, 
   Menu, 
   Pill,
-  Bell // 👈 Tambah icon Lonceng
+  Bell,
+  User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -51,16 +52,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: "Stok Masuk", href: "/dashboard/restock", icon: Package },
   ];
 
-  // --- SIDEBAR BERSIH (TANPA PROFIL DI BAWAH) ---
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-zinc-900 text-white border-r border-zinc-800">
-      {/* Logo Area */}
       <div className="h-16 flex items-center px-6 border-b border-zinc-800">
         <Pill className="w-6 h-6 text-emerald-500 mr-2" />
         <span className="font-bold text-lg tracking-wide">Ran_Admin</span>
       </div>
 
-      {/* Menu List */}
       <div className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
         {menus.map((menu) => {
           const isActive = pathname === menu.href;
@@ -78,27 +76,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           );
         })}
       </div>
-      
-      {/* ❌ PROFIL DI BAWAH SUDAH DIHAPUS BIAR BERSIH */}
     </div>
   );
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      
-      {/* 1. SIDEBAR DESKTOP */}
       <aside className="hidden md:block w-64 fixed inset-y-0 z-50">
         <SidebarContent />
       </aside>
 
-      {/* 2. KONTEN UTAMA */}
       <main className="flex-1 md:ml-64 min-h-screen flex flex-col">
-        
-        {/* HEADER (NAVBAR) */}
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40 shadow-sm">
-          
           <div className="flex items-center gap-4">
-            {/* Mobile Menu Trigger */}
             <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden">
@@ -110,23 +99,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </SheetContent>
             </Sheet>
 
-            {/* Judul Halaman */}
             <h1 className="text-lg font-semibold text-gray-800 capitalize hidden sm:block">
               {pathname.split("/").pop() || "Overview"}
             </h1>
           </div>
 
-          {/* KANAN: NOTIFIKASI & PROFIL */}
           <div className="flex items-center gap-2">
-            
-            {/* 🔔 Tombol Notifikasi (Baru) */}
             <Button variant="ghost" size="icon" className="text-gray-500 hover:text-gray-700 relative">
               <Bell className="w-5 h-5" />
-              {/* Titik Merah (Indikator ada notif) */}
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
             </Button>
 
-            {/* Profil Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full border border-gray-200">
@@ -143,7 +126,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                   </div>
                 </DropdownMenuLabel>
+                
                 <DropdownMenuSeparator />
+                
+                {/* 👇 MENU BARU: PROFILE SAYA */}
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/profile" className="cursor-pointer flex items-center w-full">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile Saya</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+                
                 <DropdownMenuItem onClick={logout} className="text-red-600 cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
@@ -154,7 +149,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </header>
 
-        {/* ISI HALAMAN */}
         <div className="flex-1 p-8 md:p-10 bg-gray-50/50 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
             {children}
