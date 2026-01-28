@@ -1,255 +1,154 @@
 "use client";
 
-import { useState } from "react";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer 
-} from "recharts";
+import { useAuth } from "@/hooks/useAuth";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { 
   DollarSign, 
-  ShoppingBag, 
-  Package, 
   Users, 
-  AlertTriangle, 
-  TrendingUp 
+  Package, 
+  Activity, 
+  ShoppingBag, 
+  History, 
+  Loader2 
 } from "lucide-react";
-
-// --- 1. STRUKTUR DATA (Backend-Ready) ---
-interface DashboardResponse {
-  success: boolean;
-  message: string;
-  data: {
-    cards: {
-      revenue: number;
-      total_sales: number;
-      total_users: number;
-      total_products: number;
-    };
-    alerts: {
-      low_stock: { 
-        id: number; 
-        nama_obat: string; 
-        stok: number;
-      }[];
-    };
-    recent_orders: any[];
-    chart_data: { 
-      tgl_penjualan: string; 
-      total_bayar: number; 
-    }[];
-  }
-}
+import Link from "next/link";
 
 export default function DashboardPage() {
-  
-  // --- 2. DUMMY DATA ---
-  const [dashboardData] = useState<DashboardResponse>({
-    success: true,
-    message: "Data dummy",
-    data: {
-      cards: {
-        revenue: 15450000,
-        total_sales: 42,
-        total_users: 12,
-        total_products: 150
-      },
-      alerts: {
-        low_stock: [
-          { id: 1, nama_obat: "Paracetamol 500mg", stok: 5 },
-          { id: 2, nama_obat: "Amoxicillin Sirup", stok: 2 },
-          { id: 3, nama_obat: "Betadine 30ml", stok: 0 }
-        ]
-      },
-      recent_orders: [],
-      chart_data: [
-        { tgl_penjualan: "2024-01-20", total_bayar: 1200000 },
-        { tgl_penjualan: "2024-01-21", total_bayar: 2500000 },
-        { tgl_penjualan: "2024-01-22", total_bayar: 1800000 },
-        { tgl_penjualan: "2024-01-23", total_bayar: 3200000 },
-        { tgl_penjualan: "2024-01-24", total_bayar: 2100000 },
-        { tgl_penjualan: "2024-01-25", total_bayar: 4500000 },
-        { tgl_penjualan: "2024-01-26", total_bayar: 3800000 },
-      ]
-    }
-  });
+  const { user, loading } = useAuth();
 
-  const loading = false;
-  const { data } = dashboardData; 
-
-  // Fungsi Format Rupiah
-  const formatRupiah = (angka: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(angka);
-  };
-
-  // Fungsi Format Tanggal (FIXED: Pakai 'any' biar Recharts aman saat build)
-  const formatTanggal = (value: any) => {
-    const date = new Date(value);
-    return date.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
-  };
-
+  // 1. TAMPILAN LOADING (Biar gak kedip)
   if (loading) {
-    return <div className="p-8 text-center text-gray-500">Loading dashboard...</div>;
+    return (
+      <div className="flex h-[50vh] items-center justify-center text-gray-400">
+        <Loader2 className="w-8 h-8 animate-spin mr-2" />
+        Memuat data...
+      </div>
+    );
   }
 
+  // =========================================================
+  // 🦁 TAMPILAN KHUSUS ADMIN (STATISTIK TOKO)
+  // =========================================================
+  if (user?.role === "admin") {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-800">Dashboard Admin</h2>
+          <Button className="bg-emerald-600 hover:bg-emerald-700">Download Laporan</Button>
+        </div>
+        
+        {/* Statistik Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Pendapatan</CardTitle>
+              <DollarSign className="h-4 w-4 text-emerald-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">Rp 45.231.000</div>
+              <p className="text-xs text-muted-foreground">+20.1% bulan ini</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pelanggan Baru</CardTitle>
+              <Users className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+2350</div>
+              <p className="text-xs text-muted-foreground">+180 minggu ini</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Stok Obat</CardTitle>
+              <Package className="h-4 w-4 text-orange-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">12,234</div>
+              <p className="text-xs text-muted-foreground">15 butuh restock</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Transaksi Aktif</CardTitle>
+              <Activity className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+573</div>
+              <p className="text-xs text-muted-foreground">+201 sejak kemarin</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Bisa tambah grafik disini nanti */}
+        <div className="rounded-xl border bg-white p-8 text-center text-gray-500 shadow-sm">
+          <p>Grafik Penjualan akan muncul di sini...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================
+  // 🐰 TAMPILAN KHUSUS PELANGGAN (MEMBER AREA)
+  // =========================================================
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      
-      {/* HEADER */}
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight text-gray-800">Dashboard</h2>
-        <p className="text-gray-500">Ringkasan performa apotek hari ini.</p>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-3xl font-bold tracking-tight text-gray-800">
+          Halo, {user?.name || "Pelanggan"}! 👋
+        </h2>
+        <p className="text-gray-500">Selamat datang kembali di Ran_Apotek. Sehat selalu ya!</p>
       </div>
 
-      {/* KARTU STATISTIK */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        
-        {/* Omset */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Omset</CardTitle>
-            <DollarSign className="h-4 w-4 text-emerald-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-emerald-600">
-              {formatRupiah(data.cards.revenue)} 
-            </div>
-            <p className="text-xs text-muted-foreground">Total pendapatan masuk</p>
-          </CardContent>
-        </Card>
-
-        {/* Transaksi */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Transaksi</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
-              {data.cards.total_sales} 
-            </div>
-            <p className="text-xs text-muted-foreground">Transaksi berhasil</p>
-          </CardContent>
-        </Card>
-
-        {/* Obat */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Obat</CardTitle>
-            <Package className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
-              {data.cards.total_products} 
-            </div>
-            <p className="text-xs text-muted-foreground">Jenis obat terdaftar</p>
-          </CardContent>
-        </Card>
-
-        {/* Pelanggan */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pelanggan</CardTitle>
-            <Users className="h-4 w-4 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">
-              {data.cards.total_users} 
-            </div>
-            <p className="text-xs text-muted-foreground">User aktif terdaftar</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* GRAFIK & WARNING */}
-      <div className="grid gap-6 md:grid-cols-7">
-        
-        {/* GRAFIK */}
-        <Card className="col-span-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Card 1: Banner Belanja */}
+        <Card className="col-span-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-none shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-gray-500"/>
-              Grafik Penjualan (7 Hari)
-            </CardTitle>
+            <CardTitle className="text-xl">Butuh Obat Apa Hari Ini?</CardTitle>
           </CardHeader>
-          <CardContent className="pl-2">
-            <div className="h-75 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart 
-                  data={data.chart_data} 
-                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis 
-                    dataKey="tgl_penjualan" 
-                    tickFormatter={formatTanggal} 
-                    stroke="#888888" 
-                    fontSize={12} 
-                    tickLine={false} 
-                    axisLine={false} 
-                  />
-                  <YAxis 
-                    stroke="#888888" 
-                    fontSize={12} 
-                    tickLine={false} 
-                    axisLine={false} 
-                    tickFormatter={(value) => `Rp${value / 1000}k`} 
-                  />
-                  <Tooltip 
-                    cursor={{fill: 'transparent'}}
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                    labelFormatter={formatTanggal}
-                  />
-                  <Bar dataKey="total_bayar" fill="oklch(0.546 0.245 262.88)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+          <CardContent className="space-y-4">
+            <p className="text-emerald-50">Cari obat, vitamin, dan kebutuhan kesehatanmu dengan mudah.</p>
+            <Link href="/dashboard/shop">
+              <Button variant="secondary" className="bg-white text-emerald-600 hover:bg-emerald-50 font-bold">
+                <ShoppingBag className="mr-2 h-4 w-4" /> Mulai Belanja
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 
-        {/* WARNING STOK */}
-        <Card className="col-span-3">
+        {/* Card 2: Status Pesanan Terakhir */}
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-red-600">
-              <AlertTriangle className="w-5 h-5" />
-              Peringatan Stok Menipis
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <History className="h-5 w-5 text-gray-500" /> Pesanan Terakhir
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {data.alerts.low_stock.length === 0 ? (
-                <p className="text-gray-500 text-sm italic">Stok aman semua</p>
-              ) : (
-                data.alerts.low_stock.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between border-b pb-2 last:border-0">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                      <p className="text-sm font-medium text-gray-700">{item.nama_obat}</p>
-                    </div>
-                    <div className="text-sm font-bold text-red-600 bg-red-50 px-2 py-1 rounded">
-                      Sisa: {item.stok}
-                    </div>
-                  </div>
-                ))
-              )}
+              <div className="border-l-4 border-emerald-500 pl-4 py-1">
+                <p className="font-medium text-gray-900">Paracetamol & Vitamin C</p>
+                <p className="text-sm text-gray-500">24 Jan 2026 • Selesai</p>
+              </div>
+              <Button variant="outline" className="w-full text-gray-600" asChild>
+                 <Link href="/dashboard/transaksi">Lihat Semua Riwayat</Link>
+              </Button>
             </div>
           </CardContent>
         </Card>
-
+      </div>
+      
+      {/* Promo Banner (Hiasan) */}
+      <div className="rounded-xl bg-orange-50 border border-orange-100 p-6 flex items-center justify-between">
+        <div>
+          <h3 className="font-bold text-orange-700 text-lg">Diskon Member 10% 🎉</h3>
+          <p className="text-orange-600 text-sm">Khusus pembelian Vitamin di atas Rp 50.000</p>
+        </div>
+        <Button variant="outline" className="border-orange-200 text-orange-700 hover:bg-orange-100">Cek Promo</Button>
       </div>
     </div>
   );
