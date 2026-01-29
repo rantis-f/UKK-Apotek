@@ -4,6 +4,7 @@ import { jwtVerify } from "jose";
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const method = request.method;
 
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -11,11 +12,19 @@ export async function middleware(request: NextRequest) {
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
   };
 
-  if (request.method === "OPTIONS") {
+  if (method === "OPTIONS") {
     return NextResponse.json({}, { headers: corsHeaders });
   }
 
   if (pathname.startsWith("/api/auth")) {
+    const response = NextResponse.next();
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+    return response;
+  }
+
+  if (pathname.startsWith("/api/obat") && method === "GET") {
     const response = NextResponse.next();
     Object.entries(corsHeaders).forEach(([key, value]) => {
       response.headers.set(key, value);
@@ -44,7 +53,6 @@ export async function middleware(request: NextRequest) {
 
   try {
     const secret = new TextEncoder().encode(jwtSecret);
-
     const { payload } = await jwtVerify(token, secret);
 
     const requestHeaders = new Headers(request.headers);
@@ -66,7 +74,7 @@ export async function middleware(request: NextRequest) {
 
   } catch (error) {
     return NextResponse.json(
-      { success: false, message: "Akses Ditolak: Token kadaluarsa!" },
+      { success: false, message: "Akses Ditolak: Token kadaluarsa atau tidak valid!" },
       { status: 401, headers: corsHeaders }
     );
   }

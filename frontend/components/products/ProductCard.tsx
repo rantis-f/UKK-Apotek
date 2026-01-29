@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 
-// Tipe data untuk produk (Biar aman)
 interface ProductProps {
   id: number;
   name: string;
@@ -17,7 +16,7 @@ export default function ProductCard({ id, name, price, category, image }: Produc
     <div className="group bg-white rounded-2xl border border-gray-100 p-3 md:p-4 hover:shadow-xl transition-all duration-300">
       <div className="relative aspect-square rounded-xl overflow-hidden mb-4 bg-gray-50">
         <img 
-          src={image} 
+          src={image}
           alt={name} 
           className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500" 
         />
@@ -31,7 +30,7 @@ export default function ProductCard({ id, name, price, category, image }: Produc
       </h3>
       
       <p className="text-emerald-600 font-extrabold text-lg">
-        Rp {price.toLocaleString("id-ID")}
+        Rp {price?.toLocaleString("id-ID") || "0"}
       </p>
       
       <Button className="w-full mt-4 bg-gray-50 hover:bg-emerald-600 text-gray-800 hover:text-white border-none transition-all shadow-none">
