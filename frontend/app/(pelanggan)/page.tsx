@@ -8,13 +8,21 @@ import Footer from "@/components/layout/Footer";
 import Hero from "@/components/home/Hero";
 import ServiceFeatures from "@/components/home/ServiceFeatures";
 import ProductCard from "@/components/products/ProductCard";
-import { ChevronRight, Loader2, PackageSearch, Sparkles, Flame } from "lucide-react";
+import { 
+  ChevronRight, 
+  Loader2, 
+  PackageSearch, 
+  Sparkles, 
+  Flame, 
+  Pill 
+} from "lucide-react";
 import Link from "next/link";
 
 export default function LandingPage() {
   const router = useRouter();
   const { user, token, loading: authLoading } = useAuth();
   
+  const [categories, setCategories] = useState([]);
   const [bestSellers, setBestSellers] = useState([]);
   const [latestProducts, setLatestProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,14 +43,17 @@ export default function LandingPage() {
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
-        const [resBest, resLatest] = await Promise.all([
+        const [resCat, resBest, resLatest] = await Promise.all([
+          fetch(`${API_URL}/jenis-obat`),
           fetch(`${API_URL}/obat?limit=4&sort=popular`),
           fetch(`${API_URL}/obat?limit=4&sort=latest`)
         ]);
         
+        const catJson = await resCat.json();
         const bestJson = await resBest.json();
         const latestJson = await resLatest.json();
         
+        if (catJson.success) setCategories(catJson.data);
         if (bestJson.success) setBestSellers(bestJson.data.slice(0, 4));
         if (latestJson.success) setLatestProducts(latestJson.data.slice(0, 4));
       } catch (error) {
@@ -55,7 +66,13 @@ export default function LandingPage() {
     if (API_URL && isHydrated) fetchHomeData();
   }, [API_URL, isHydrated]);
 
-  if (!isHydrated || authLoading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-emerald-600" /></div>;
+  if (!isHydrated || authLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin text-emerald-600 w-10 h-10" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -64,15 +81,35 @@ export default function LandingPage() {
         <Hero />
         <ServiceFeatures />
 
+        <section className="container mx-auto px-6 py-12">
+          <h2 className="text-2xl font-black text-gray-900 mb-6">Cari Berdasarkan Jenis</h2>
+          <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar md:grid md:grid-cols-6">
+            {categories.map((cat: any) => (
+              <Link 
+                key={cat.id} 
+                href={`/obat?category=${cat.id}`}
+                className="shrink-0 w-32 md:w-full flex flex-col items-center gap-3 p-6 rounded-[2.5rem] bg-gray-50 hover:bg-emerald-600 hover:text-white transition-all group border border-gray-100/50"
+              >
+                <div className="bg-white p-3 rounded-2xl shadow-sm group-hover:bg-emerald-500 transition-colors">
+                  <Pill className="w-6 h-6 text-emerald-600 group-hover:text-white" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-center">
+                  {cat.jenis}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
         <section className="container mx-auto px-6 py-16">
           <div className="flex justify-between items-end mb-10">
             <div>
               <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
                 <Flame className="text-orange-500 w-6 h-6" /> Paling Banyak Dicari
               </h2>
-              <p className="text-gray-500 text-sm">Produk kesehatan andalan pelanggan kami.</p>
+              <p className="text-gray-500 text-sm">Andalan kesehatan pelanggan kami.</p>
             </div>
-            <Link href="/catalogue" className="text-emerald-600 font-bold text-sm hover:underline flex items-center gap-1">
+            <Link href="/obat" className="text-emerald-600 font-bold text-sm hover:underline flex items-center gap-1">
               Lihat Semua <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
@@ -92,7 +129,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <div className="container mx-auto px-6"><hr className="border-gray-100" /></div>
+        <div className="container mx-auto px-6"><hr className="border-gray-50" /></div>
 
         <section className="container mx-auto px-6 py-16">
           <div className="flex justify-between items-end mb-10">
@@ -102,7 +139,7 @@ export default function LandingPage() {
               </h2>
               <p className="text-gray-500 text-sm">Baru saja tiba di rak apotek kami.</p>
             </div>
-            <Link href="/catalogue" className="text-emerald-600 font-bold text-sm hover:underline flex items-center gap-1">
+            <Link href="/obat" className="text-emerald-600 font-bold text-sm hover:underline flex items-center gap-1">
               Lihat Semua <ChevronRight className="w-4 h-4" />
             </Link>
           </div>

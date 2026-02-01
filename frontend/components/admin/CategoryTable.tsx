@@ -1,77 +1,57 @@
 "use client";
 
-import { Pencil, Trash2, Tag, Inbox } from "lucide-react";
-
-interface Category {
-  id: string;
-  jenis: string;
-  deskripsi_jenis: string;
-}
+import { Edit2, Trash2, ImageIcon } from "lucide-react";
 
 interface CategoryTableProps {
-  data: Category[];
-  onEdit: (category: Category) => void;
+  data: any[];
+  onEdit: (category: any) => void;
   onDelete: (id: string) => void;
 }
 
-export default function CategoryTable({ data = [], onEdit, onDelete }: CategoryTableProps) {
-  const hasData = data && data.length > 0;
+export default function CategoryTable({ data, onEdit, onDelete }: CategoryTableProps) {
+  const safeData = data || [];
 
   return (
-    <div className="bg-white border rounded-2xl overflow-hidden shadow-sm">
-      <table className="w-full text-left border-collapse">
-        <thead className="bg-gray-50 border-b">
-          <tr>
-            <th className="px-6 py-4 text-sm font-semibold text-gray-600">Nama Kategori</th>
-            <th className="px-6 py-4 text-sm font-semibold text-gray-600">Deskripsi</th>
-            <th className="px-6 py-4 text-sm font-semibold text-gray-600 text-center">Aksi</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y">
-          {hasData ? (
-            data.map((cat) => (
-              <tr key={cat.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-emerald-100 rounded-lg">
-                      <Tag className="w-3.5 h-3.5 text-emerald-600" />
-                    </div>
-                    <span className="font-medium text-gray-800">{cat.jenis}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500 italic max-w-xs truncate">
-                  {cat.deskripsi_jenis || "-"}
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex justify-center gap-2">
-                    <button 
-                      onClick={() => onEdit(cat)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                    <button 
-                      onClick={() => onDelete(cat.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={3} className="px-6 py-12 text-center text-gray-400">
-                <div className="flex flex-col items-center gap-2">
-                  <Inbox className="w-10 h-10 opacity-20" />
-                  <p className="text-sm italic">Belum ada kategori obat...</p>
+    <table className="w-full text-left">
+      <thead className="bg-gray-50/50 text-gray-500 text-[10px] uppercase tracking-widest font-black">
+        <tr>
+          <th className="px-6 py-5 text-center">Foto</th>
+          <th className="px-6 py-5">Nama Kategori</th>
+          <th className="px-6 py-5">Deskripsi</th>
+          <th className="px-6 py-5 text-right">Aksi</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-50 text-sm">
+        {safeData.length > 0 ? (
+          safeData.map((cat: any) => (
+            <tr key={cat.id} className="hover:bg-emerald-50/30 transition-colors group">
+              <td className="px-6 py-4 flex justify-center">
+                <div className="w-12 h-12 rounded-xl bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center shadow-sm">
+                  {cat.image_url ? (
+                    <img 
+                      src={cat.image_url} 
+                      alt={cat.jenis} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                    />
+                  ) : (
+                    <ImageIcon className="w-5 h-5 text-gray-300" />
+                  )}
+                </div>
+              </td>
+              <td className="px-6 py-4 font-bold text-gray-800">{cat.jenis}</td>
+              <td className="px-6 py-4 text-gray-500 max-w-xs truncate">{cat.deskripsi_jenis || "-"}</td>
+              <td className="px-6 py-4 text-right">
+                <div className="flex justify-end gap-2">
+                  <button onClick={() => onEdit(cat)} className="p-2 hover:bg-emerald-100 text-emerald-600 rounded-xl transition-all"><Edit2 className="w-4 h-4" /></button>
+                  <button onClick={() => onDelete(cat.id)} className="p-2 hover:bg-red-100 text-red-600 rounded-xl transition-all"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </td>
             </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+          ))
+        ) : (
+          <tr><td colSpan={4} className="py-20 text-center text-gray-400 font-bold">Data tidak ditemukan.</td></tr>
+        )}
+      </tbody>
+    </table>
   );
 }

@@ -12,11 +12,20 @@ export async function middleware(request: NextRequest) {
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
   };
 
+  // 1. Handle Preflight OPTIONS (Untuk CORS)
   if (method === "OPTIONS") {
     return NextResponse.json({}, { headers: corsHeaders });
   }
 
-  if (pathname.startsWith("/api/auth")) {
+  // 2. Tentukan Rute Publik (Boleh diakses tanpa login)
+  const isAuthRoute = pathname.startsWith("/api/auth");
+  
+  // Tambahkan /api/jenis-obat di sini agar muncul di Landing Page
+  const isPublicGet = 
+    (pathname.startsWith("/api/obat") || pathname.startsWith("/api/jenis-obat")) 
+    && method === "GET";
+
+  if (isAuthRoute || isPublicGet) {
     const response = NextResponse.next();
     Object.entries(corsHeaders).forEach(([key, value]) => {
       response.headers.set(key, value);
@@ -24,14 +33,7 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  if (pathname.startsWith("/api/obat") && method === "GET") {
-    const response = NextResponse.next();
-    Object.entries(corsHeaders).forEach(([key, value]) => {
-      response.headers.set(key, value);
-    });
-    return response;
-  }
-
+  // 3. Proteksi Rute Sisa (Wajib Token)
   const authHeader = request.headers.get("Authorization");
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
