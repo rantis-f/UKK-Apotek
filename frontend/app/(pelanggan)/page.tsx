@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import Footer from "@/components/layout/Footer";
 import Hero from "@/components/home/Hero";
 import ServiceFeatures from "@/components/home/ServiceFeatures";
 import ProductCard from "@/components/products/ProductCard";
@@ -157,7 +156,6 @@ export default function LandingPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

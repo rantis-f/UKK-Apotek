@@ -35,8 +35,8 @@ export default function ManajemenObatPage() {
         obatService.getAll(token),
         categoryService.getAll(token)
       ]);
-      setItems(dataObat || []);
-      setCategories(dataKategori || []);
+      setItems(dataObat.data || []);
+      setCategories(dataKategori.data || []);
     } catch (error: any) {
       toast.error("Gagal sinkron data dengan server");
     } finally {

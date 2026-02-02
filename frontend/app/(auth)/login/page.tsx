@@ -36,7 +36,6 @@ export default function MemberLoginPage() {
     if (result.success) {
       toast.success("Login Berhasil! Mengalihkan...");
       
-      // TRICK PALING AMPUH: Hard redirect agar Navbar baca ulang Cookie
       setTimeout(() => {
         window.location.href = "/"; 
       }, 800);
@@ -48,10 +47,9 @@ export default function MemberLoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white">
-      {/* SISI KIRI: BANNER */}
       <div className="relative w-full md:w-1/2 h-48 md:h-auto bg-zinc-900 flex flex-col justify-between p-6 md:p-12 overflow-hidden shrink-0">
         <div className="absolute inset-0 z-0 opacity-60 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1631549916768-4119b2e5f926?q=80&w=1979&auto=format&fit=crop')" }} />
-        <div className="absolute inset-0 z-10 bg-gradient-to-t md:bg-gradient-to-r from-emerald-950 via-emerald-900/80 to-transparent" />
+        <div className="absolute inset-0 z-10 bg-linear-to-t md:bg-linear-to-r from-emerald-950 via-emerald-900/80 to-transparent" />
         <div className="relative z-20 flex items-center gap-2">
           <div className="bg-white text-emerald-700 p-1.5 rounded-lg shadow-lg">
             <Pill className="w-5 h-5 md:w-6 md:h-6" />
@@ -72,7 +70,6 @@ export default function MemberLoginPage() {
         <div className="relative z-20 hidden md:block text-[10px] text-emerald-200/60 uppercase tracking-widest">&copy; 2026 Ran_Store Healthcare</div>
       </div>
 
-      {/* SISI KANAN: FORM */}
       <div className="flex-1 flex items-center justify-center p-6 md:p-12 bg-gray-50/50 relative z-30 -mt-8 md:mt-0 rounded-t-3xl md:rounded-none">
         <div className="w-full max-w-sm space-y-8 bg-white p-8 rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100">
           <Link href="/" className="inline-flex items-center text-sm font-medium text-gray-400 hover:text-emerald-600 transition-colors">
@@ -109,7 +106,7 @@ export default function MemberLoginPage() {
             </Button>
           </form>
           <p className="text-center text-sm text-gray-500 pt-4 border-t">
-            Belum punya akun? <Link href="/auth/register" className="font-bold text-emerald-600 hover:underline">Daftar Gratis</Link>
+            Belum punya akun? <Link href="/register" className="font-bold text-emerald-600 hover:underline">Daftar Gratis</Link>
           </p>
         </div>
       </div>

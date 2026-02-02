@@ -18,6 +18,7 @@ import {
   User,
   ShoppingBag,
   FolderTree,
+  Truck, // Ikon baru untuk Distributor
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -37,12 +38,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { user, logout } = useAuth();
 
   const displayName = user?.name || user?.nama_pelanggan || "User";
+  const userRole = user?.role || user?.jabatan || "guest";
 
+  // --- LOGIC MENU BERDASARKAN ROLE ---
   const menus = useMemo(() => {
-    const role = user?.role || ""; 
     const baseMenu = [{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard }];
 
-    if (role === "pelanggan") {
+    if (userRole === "pelanggan") {
       return [
         ...baseMenu,
         { name: "Belanja", href: "/dashboard/shop", icon: ShoppingBag },
@@ -52,19 +54,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     const items = [...baseMenu];
 
-    if (["kasir", "admin", "pemilik"].includes(role)) {
+    // Menu Kasir (Akses Cepat Transaksi)
+    if (["kasir", "admin", "pemilik"].includes(userRole)) {
       items.push({ name: "Kasir", href: "/dashboard/kasir", icon: ShoppingCart });
     }
 
-    if (["apoteker", "admin", "pemilik"].includes(role)) {
+    // Menu Inventori & Medis
+    if (["apoteker", "admin", "pemilik"].includes(userRole)) {
       items.push(
         { name: "Data Obat", href: "/dashboard/obat", icon: Pill },
         { name: "Jenis Obat", href: "/dashboard/jenis-obat", icon: FolderTree },
+        { name: "Distributor", href: "/dashboard/distributor", icon: Truck }, // Menu Baru
         { name: "Stok Masuk", href: "/dashboard/restock", icon: Package }
       );
     }
 
-    if (["admin", "pemilik"].includes(role)) {
+    // Menu Manajemen User & Pelanggan
+    if (["admin", "pemilik"].includes(userRole)) {
       items.push(
         { name: "Data Pelanggan", href: "/dashboard/pelanggan", icon: Users },
         { name: "Manajemen User", href: "/dashboard/users", icon: ShieldCheck }
@@ -74,7 +80,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     items.push({ name: "Riwayat Transaksi", href: "/dashboard/transaksi", icon: History });
     
     return items;
-  }, [user?.role]);
+  }, [userRole]);
 
   const getPageTitle = () => {
     const segment = pathname.split("/").pop();
@@ -82,19 +88,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (segment === "jenis-obat") return "Manajemen Jenis Obat";
     if (segment === "obat") return "Katalog Obat";
     if (segment === "kasir") return "Point of Sales";
+    if (segment === "distributor") return "Daftar Vendor PBF";
+    if (segment === "restock") return "Log Stok Masuk";
     return segment?.replace(/-/g, " ") || "Dashboard";
   };
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-zinc-950 text-white border-r border-zinc-800">
       <div className="h-16 flex items-center px-6 border-b border-zinc-800/50">
-        <Pill className="w-6 h-6 text-emerald-500 mr-2" />
-        <span className="font-bold text-lg tracking-tight bg-linear-to-r from-white to-zinc-400 bg-clip-text text-transparent">
-          {user?.role === "pelanggan" ? "Ran_Apotek" : "Ran_Admin"}
+        <div className="bg-emerald-500/10 p-1.5 rounded-lg mr-3">
+          <Pill className="w-5 h-5 text-emerald-500" />
+        </div>
+        <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
+          {userRole === "pelanggan" ? "Ran_Apotek" : "Ran_Admin"}
         </span>
       </div>
 
-      <div className="flex-1 py-6 px-4 space-y-1.5 overflow-y-auto">
+      <div className="flex-1 py-6 px-4 space-y-1.5 overflow-y-auto custom-scrollbar">
         {menus.map((menu) => {
           const isActive = pathname === menu.href || (menu.href !== "/dashboard" && pathname.startsWith(menu.href));
           
@@ -111,6 +121,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </Link>
           );
         })}
+      </div>
+
+      <div className="p-4 border-t border-zinc-800/50">
+        <div className="bg-zinc-900/50 rounded-2xl p-4 border border-zinc-800">
+          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1 text-center">Server Status</p>
+          <div className="flex items-center justify-center gap-2">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+            <span className="text-[10px] font-bold text-emerald-500">CONNECTED</span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -153,24 +173,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end">
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{displayName}</p>
-                    <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+              <DropdownMenuContent className="w-60 mt-2 rounded-2xl p-2" align="end">
+                <DropdownMenuLabel className="font-normal p-3">
+                  <div className="flex flex-col space-y-2">
+                    <p className="text-sm font-bold leading-none text-gray-800">{displayName}</p>
+                    <p className="text-xs leading-none text-muted-foreground truncate">{user?.email}</p>
+                    <div className="inline-flex items-center rounded-lg bg-emerald-50 px-2 py-1 text-[10px] font-black text-emerald-600 uppercase tracking-wider w-fit border border-emerald-100">
+                      {userRole}
+                    </div>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/profile" className="cursor-pointer flex items-center w-full">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profil Saya</span>
+                <DropdownMenuItem asChild className="rounded-xl cursor-pointer p-3">
+                  <Link href="/dashboard/profile" className="flex items-center w-full">
+                    <User className="mr-3 h-4 w-4 text-emerald-500" />
+                    <span className="font-bold text-gray-700 text-xs">Profil Saya</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="text-red-600 cursor-pointer">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Keluar Akun</span>
+                <DropdownMenuItem onClick={logout} className="rounded-xl text-red-600 cursor-pointer p-3 focus:bg-red-50 focus:text-red-600">
+                  <LogOut className="mr-3 h-4 w-4" />
+                  <span className="font-bold text-xs uppercase tracking-widest">Keluar Akun</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
