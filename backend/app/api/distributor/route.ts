@@ -1,23 +1,33 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
+
 export async function GET() {
-  const data = await prisma.distributor.findMany();
-  return NextResponse.json({ success: true, data });
+  try {
+    const distributors = await prisma.distributor.findMany({
+      orderBy: { created_at: "desc" },
+    });
+    return NextResponse.json({ success: true, data: distributors });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  }
 }
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const body = await request.json();
-    const data = await prisma.distributor.create({
+    const body = await req.json();
+    const newDistributor = await prisma.distributor.create({
       data: {
         nama_distributor: body.nama_distributor,
+        telepon: body.telepon,
         alamat: body.alamat,
-        telepon: body.telp
-      }
+      },
     });
-    return NextResponse.json({ success: true, message: "Berhasil tambah distributor", data }, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ success: false, message: "Gagal tambah data" }, { status: 500 });
+    return NextResponse.json({ success: true, data: newDistributor });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, message: error.message }, { status: 400 });
   }
 }
