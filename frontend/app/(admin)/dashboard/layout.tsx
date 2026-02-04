@@ -8,6 +8,7 @@ import {
   LayoutDashboard, ShoppingCart, Package, ShieldCheck,
   Users, History, LogOut, Menu, Pill, Bell,
   User, ShoppingBag, FolderTree, Truck, ChevronRight,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -57,7 +58,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (["admin", "pemilik"].includes(userRole)) {
       items.push(
         { name: "Data Pelanggan", href: "/dashboard/pelanggan", icon: Users },
-        { name: "Manajemen User", href: "/dashboard/users", icon: ShieldCheck }
+        { name: "Manajemen User", href: "/dashboard/users", icon: ShieldCheck },
+        { name: "Metode Bayar", href: "/dashboard/metode-bayar", icon: CreditCard }
       );
     }
     items.push({ name: "Riwayat Transaksi", href: "/dashboard/transaksi", icon: History });
@@ -80,7 +82,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         <div className="flex flex-col">
           <span className="font-black text-lg tracking-tighter leading-none bg-linear-to-br from-white to-emerald-100 bg-clip-text text-transparent">
-            SiSpare<span className="text-emerald-400">+</span>
+            SiSpare
           </span>
           <span className="text-[9px] font-black text-emerald-400/40 uppercase tracking-[0.25em] mt-1">Pharmacy System</span>
         </div>
