@@ -11,10 +11,10 @@ import {
   CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
   SheetTitle
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -62,7 +62,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { name: "Metode Bayar", href: "/dashboard/metode-bayar", icon: CreditCard }
       );
     }
-    items.push({ name: "Riwayat Transaksi", href: "/dashboard/transaksi", icon: History });
+    items.push({ name: "Daftar Pesanan", href: "/dashboard/pesanan", icon: History });
     return items;
   }, [userRole]);
 
@@ -82,7 +82,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         <div className="flex flex-col">
           <span className="font-black text-lg tracking-tighter leading-none bg-linear-to-br from-white to-emerald-100 bg-clip-text text-transparent">
-            SiSpare
+            RAN_STORE
           </span>
           <span className="text-[9px] font-black text-emerald-400/40 uppercase tracking-[0.25em] mt-1">Pharmacy System</span>
         </div>
@@ -133,7 +133,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           className="p-0 bg-[#022c22] border-emerald-900/30 w-72 [&>button]:text-white [&>button]:opacity-80 [&>button:hover]:text-emerald-400 [&>button:hover]:opacity-100 transition-all"
         >
           <SheetHeader className="sr-only">
-            <SheetTitle>SiSpare+ Navigation</SheetTitle>
+            <SheetTitle>RAN_STORE</SheetTitle>
           </SheetHeader>
           <SidebarContent />
         </SheetContent>
