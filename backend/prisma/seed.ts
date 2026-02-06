@@ -5,279 +5,154 @@ import 'dotenv/config';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Memulai Seeding Database...');
+  console.log('🚀 Memulai Seeding Database "Ran_Store" PRO dengan Link Gambar Real...');
 
   const passwordHash = await hash('password123', 10);
 
-  console.log('👤 Membuat Data User Admin & Karyawan...');
-
+  // --- 1. MASTER USER (ADMIN & KASIR) ---
+  console.log('👥 Mengisi data User Internal...');
   await prisma.user.upsert({
     where: { email: 'admin@apotek.com' },
     update: {},
-    create: {
-      name: 'Super Admin',
-      email: 'admin@apotek.com',
-      password: passwordHash,
-      jabatan: 'admin',
-    },
+    create: { name: 'Admin Utama', email: 'admin@apotek.com', password: passwordHash, jabatan: 'admin' },
   });
 
   await prisma.user.upsert({
     where: { email: 'kasir@apotek.com' },
     update: {},
-    create: {
-      name: 'Kasir Utama',
-      email: 'kasir@apotek.com',
-      password: passwordHash,
-      jabatan: 'kasir',
+    create: { name: 'Budi Kasir', email: 'kasir@apotek.com', password: passwordHash, jabatan: 'kasir' },
+  });
+
+  // --- 2. PELANGGAN (WAJIB ID 1 = PELANGGAN UMUM) ---
+  console.log('👤 Mengisi data Pelanggan...');
+  const pel1 = await prisma.pelanggan.create({
+    data: { 
+      nama_pelanggan: 'Pelanggan Umum', 
+      email: 'umum@ranstore.com', 
+      katakunci: '-', 
+      no_telp: '-', 
+      alamat1: 'Walk-in Toko' 
     },
   });
 
-  await prisma.user.upsert({
-    where: { email: 'owner@apotek.com' },
-    update: {},
-    create: {
-      name: 'Bapak Pemilik',
-      email: 'owner@apotek.com',
-      password: passwordHash,
-      jabatan: 'pemilik',
+  const pel2 = await prisma.pelanggan.create({
+    data: { 
+      nama_pelanggan: 'Andi Wijaya', 
+      email: 'andi@gmail.com', 
+      katakunci: '123456', 
+      no_telp: '0812334455', 
+      alamat1: 'Jl. Pemuda No. 12', 
+      kota1: 'Jakarta' 
     },
   });
 
-  console.log('👥 Memasukkan Data Pelanggan...');
+  // --- 3. METODE BAYAR (WAJIB ID 1 = TUNAI) ---
+  console.log('💳 Mengisi Metode Pembayaran...');
+  const bayar1 = await prisma.metodeBayar.create({
+    data: { metode_pembayaran: 'Tunai', tempat_bayar: 'Kasir Utama', url_logo: 'https://cdn-icons-png.flaticon.com/512/2331/2331895.png' }
+  });
 
-  const pelanggan1 = await prisma.pelanggan.upsert({
-    where: { email: 'budi@gmail.com' },
-    update: {},
-    create: {
-      nama_pelanggan: 'Budi Santoso',
-      email: 'budi@gmail.com',
-      katakunci: '123456',
-      no_telp: '08123456789',
-      alamat1: 'Jl. Mawar No. 10, Surabaya',
-      kota1: 'Surabaya',
-      propinsi1: 'Jawa Timur',
+  await prisma.metodeBayar.create({
+    data: { metode_pembayaran: 'Transfer BCA', no_rekening: '888-222-333', tempat_bayar: 'M-Banking', url_logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg' }
+  });
+
+  // --- 4. JENIS PENGIRIMAN (WAJIB ID 1 = AMBIL DI TOKO) ---
+  console.log('🚚 Mengisi Jenis Pengiriman...');
+  const kirim1 = await prisma.jenisPengiriman.create({
+    data: { jenis_kirim: 'standar', nama_ekspedisi: 'Ambil di Toko', logo_ekspedisi: 'https://cdn-icons-png.flaticon.com/512/869/869636.png' }
+  });
+
+  const kirim2 = await prisma.jenisPengiriman.create({
+    data: { jenis_kirim: 'regular', nama_ekspedisi: 'J&T Express', logo_ekspedisi: 'https://upload.wikimedia.org/wikipedia/en/2/22/J%26T_Express_logo.png' }
+  });
+
+  // --- 5. MASTER OBAT (DENGAN LINK GAMBAR ASLI) ---
+  console.log('💊 Mengisi Master Obat dengan Gambar Real...');
+  const katTablet = await prisma.jenisObat.create({ data: { jenis: 'Tablet', deskripsi_jenis: 'Obat padat telan' } });
+  const katSirup = await prisma.jenisObat.create({ data: { jenis: 'Sirup', deskripsi_jenis: 'Obat cair manis' } });
+  const katVitamin = await prisma.jenisObat.create({ data: { jenis: 'Vitamin', deskripsi_jenis: 'Suplemen kesehatan' } });
+
+  const obatList = [
+    { 
+      nama_obat: 'Paracetamol 500mg', 
+      idjenis: katTablet.id, 
+      harga_jual: 5000, 
+      stok: 100, 
+      foto1: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=1000&auto=format&fit=crop' 
     },
-  });
-
-  const pelanggan2 = await prisma.pelanggan.upsert({
-    where: { email: 'siti@gmail.com' },
-    update: {},
-    create: {
-      nama_pelanggan: 'Siti Aminah',
-      email: 'siti@gmail.com',
-      katakunci: '123456',
-      no_telp: '08987654321',
-      alamat1: 'Jl. Melati No. 5, Malang',
-      kota1: 'Malang',
-      propinsi1: 'Jawa Timur',
+    { 
+      nama_obat: 'Promag Tablet', 
+      idjenis: katTablet.id, 
+      harga_jual: 9000, 
+      stok: 50, 
+      foto1: 'https://images.unsplash.com/photo-1576073719710-aa4e334b077a?q=80&w=1000&auto=format&fit=crop' 
     },
-  });
-
-  console.log('🚚 Memasukkan Data Distributor & Ekspedisi...');
-
-  const dist1 = await prisma.distributor.create({
-    data: {
-      nama_distributor: 'PT. Kimia Farma Trading',
-      alamat: 'Jakarta Pusat',
-      telepon: '021-123456',
+    { 
+      nama_obat: 'Sanmol Forte Sirup', 
+      idjenis: katSirup.id, 
+      harga_jual: 25000, 
+      stok: 30, 
+      foto1: 'https://images.unsplash.com/photo-1631549916768-4119b2e55916?q=80&w=1000&auto=format&fit=crop' 
     },
-  });
-
-  const dist2 = await prisma.distributor.create({
-    data: {
-      nama_distributor: 'PT. Merapi Farma',
-      alamat: 'Yogyakarta',
-      telepon: '0274-987654',
+    { 
+      nama_obat: 'Neurobion Forte', 
+      idjenis: katVitamin.id, 
+      harga_jual: 45000, 
+      stok: 15, 
+      foto1: 'https://images.unsplash.com/photo-1471864190281-ad5f9f81ce44?q=80&w=1000&auto=format&fit=crop' 
     },
+  ];
+
+  const createdObats = [];
+  for (const o of obatList) {
+    const created = await prisma.obat.create({ data: o });
+    createdObats.push(created);
+  }
+
+  // --- 6. DISTRIBUTOR & SIMULASI RESTOCK ---
+  console.log('📦 Menambahkan Distributor & Pembelian...');
+  const dist = await prisma.distributor.create({
+    data: { nama_distributor: 'PT Kimia Farma', telepon: '021-555666', alamat: 'Jakarta' }
   });
-
-  const bayarTransfer = await prisma.metodeBayar.create({
-    data: {
-      metode_pembayaran: 'Transfer BCA',
-      no_rekening: '888222333',
-      tempat_bayar: 'Bank BCA',
-      url_logo: 'bca.png',
-    },
-  });
-
-  const bayarCOD = await prisma.metodeBayar.create({
-    data: {
-      metode_pembayaran: 'COD (Bayar Ditempat)',
-      tempat_bayar: 'Rumah',
-      url_logo: 'cod.png',
-    },
-  });
-
-  const kirimJNE = await prisma.jenisPengiriman.create({
-    data: {
-      jenis_kirim: 'regular',
-      nama_ekspedisi: 'JNE Regular',
-      logo_ekspedisi: 'jne.png',
-    },
-  });
-
-  const kirimInstant = await prisma.jenisPengiriman.create({
-    data: {
-      jenis_kirim: 'same_day',
-      nama_ekspedisi: 'GoSend Instant',
-      logo_ekspedisi: 'gosend.png',
-    },
-  });
-
-  console.log('💊 Memasukkan Data Obat-obatan...');
-
-  const tablet = await prisma.jenisObat.create({
-    data: { jenis: 'Tablet', deskripsi_jenis: 'Obat padat telan' },
-  });
-
-  const sirup = await prisma.jenisObat.create({
-    data: { jenis: 'Sirup', deskripsi_jenis: 'Obat cair manis' },
-  });
-
-  const kapsul = await prisma.jenisObat.create({
-    data: { jenis: 'Kapsul', deskripsi_jenis: 'Obat cangkang lunak' },
-  });
-
-  const salep = await prisma.jenisObat.create({
-    data: { jenis: 'Salep', deskripsi_jenis: 'Obat oles luar' },
-  });
-
-  const obatPara = await prisma.obat.create({
-    data: {
-      nama_obat: 'Paracetamol 500mg',
-      idjenis: tablet.id,
-      harga_jual: 5000,
-      stok: 150,
-      deskripsi_obat: 'Pereda demam dan nyeri ringan.',
-      foto1: 'paracetamol.jpg',
-    },
-  });
-
-  const obatAmox = await prisma.obat.create({
-    data: {
-      nama_obat: 'Amoxicillin 500mg',
-      idjenis: kapsul.id,
-      harga_jual: 12000,
-      stok: 80,
-      deskripsi_obat: 'Antibiotik untuk infeksi bakteri.',
-      foto1: 'amoxicillin.jpg',
-    },
-  });
-
-  const obatOBH = await prisma.obat.create({
-    data: {
-      nama_obat: 'OBH Combi Anak',
-      idjenis: sirup.id,
-      harga_jual: 18000,
-      stok: 45,
-      deskripsi_obat: 'Obat batuk hitam rasa strawberry.',
-      foto1: 'obh_anak.jpg',
-    },
-  });
-
-  const obatKalpanax = await prisma.obat.create({
-    data: {
-      nama_obat: 'Kalpanax Salep',
-      idjenis: salep.id,
-      harga_jual: 25000,
-      stok: 20,
-      deskripsi_obat: 'Obat gatal jamur kulit.',
-      foto1: 'kalpanax.jpg',
-    },
-  });
-
-  console.log('📥 Simulasi Restock Barang...');
 
   await prisma.pembelian.create({
     data: {
-      nonota: 'INV-BUY-001',
-      tgl_pembelian: new Date('2024-01-10'),
-      total_bayar: 500000,
-      id_distributor: dist1.id,
+      nonota: 'PURCH/2026/001',
+      tgl_pembelian: new Date(),
+      total_bayar: 200000,
+      id_distributor: dist.id,
       details: {
         create: [
-          { id_obat: obatPara.id, jumlah_beli: 100, harga_beli: 3000, subtotal: 300000 },
-          { id_obat: obatAmox.id, jumlah_beli: 20, harga_beli: 10000, subtotal: 200000 },
-        ],
-      },
-    },
+          { id_obat: createdObats[0].id, jumlah_beli: 50, harga_beli: 3000, subtotal: 150000 },
+          { id_obat: createdObats[1].id, jumlah_beli: 10, harga_beli: 5000, subtotal: 50000 },
+        ]
+      }
+    }
   });
 
-  console.log('📤 Simulasi Transaksi Penjualan...');
-
+  // --- 7. SIMULASI PENJUALAN ---
+  console.log('🛒 Mensimulasikan Transaksi Penjualan...');
   const jual1 = await prisma.penjualan.create({
     data: {
       tgl_penjualan: new Date(),
-      id_pelanggan: pelanggan1.id,
-      id_metode_bayar: bayarTransfer.id,
-      id_jenis_kirim: kirimJNE.id,
-      ongkos_kirim: 10000,
+      id_pelanggan: pel1.id,
+      id_metode_bayar: bayar1.id,
+      id_jenis_kirim: kirim1.id,
+      ongkos_kirim: 0,
       biaya_app: 1000,
-      total_bayar: 34000,
+      total_bayar: 11000,
       status_order: 'Selesai',
-      keterangan_status: 'Barang sudah diterima',
       details: {
         create: [
-          { id_obat: obatPara.id, jumlah_beli: 2, harga_beli: 5000, subtotal: 10000 },
-          { id_obat: obatOBH.id, jumlah_beli: 1, harga_beli: 18000, subtotal: 18000 },
-        ],
-      },
-    },
+          { id_obat: createdObats[0].id, jumlah_beli: 2, harga_beli: 5000, subtotal: 10000 }
+        ]
+      }
+    }
   });
 
-  await prisma.pengiriman.create({
-    data: {
-      id_penjualan: jual1.id,
-      status_kirim: 'Tiba_Di_Tujuan',
-      nama_kurir: 'Joko (JNE)',
-      no_invoice: 'INV-JNE-001',
-      tgl_kirim: new Date(),
-      tgl_tiba: new Date(),
-      keterangan: 'Paket diterima oleh satpam',
-    },
-  });
-
-  await prisma.penjualan.create({
-    data: {
-      tgl_penjualan: new Date(),
-      id_pelanggan: pelanggan2.id,
-      id_metode_bayar: bayarCOD.id,
-      id_jenis_kirim: kirimInstant.id,
-      ongkos_kirim: 15000,
-      biaya_app: 1000,
-      total_bayar: 41000,
-      status_order: 'Diproses',
-      details: {
-        create: [
-          { id_obat: obatKalpanax.id, jumlah_beli: 1, harga_beli: 25000, subtotal: 25000 },
-        ],
-      },
-    },
-  });
-
-  console.log('🛒 Mengisi Keranjang Belanja...');
-
-  await prisma.keranjang.createMany({
-    data: [
-      {
-        id_pelanggan: pelanggan1.id,
-        id_obat: obatAmox.id,
-        jumlah_order: 5,
-        harga: 12000,
-        subtotal: 60000,
-      },
-    ],
-  });
-
-  console.log('✅ SEEDING BERHASIL! Database siap digunakan.');
+  console.log('✅ SEEDING BERHASIL! Gambar sudah otomatis terhubung ke link Unsplash.');
 }
 
 main()
-  .catch((e) => {
-    console.error('❌ Terjadi Error saat Seeding:', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .catch((e) => { console.error('❌ Error Seeding:', e); process.exit(1); })
+  .finally(async () => { await prisma.$disconnect(); });
