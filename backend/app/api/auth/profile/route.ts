@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { jwtVerify } from "jose";
 
+// --- 1. HELPER SERIALIZER (WAJIB ADA) ---
+// Tanpa ini, ID yang bertipe BigInt akan membuat API error 500
+const serialize = (data: any) => {
+  return JSON.parse(
+    JSON.stringify(data, (key, value) =>
+      typeof value === "bigint" ? value.toString() : value
+    )
+  );
+};
+
 export async function GET(request: Request) {
   try {
     const authHeader = request.headers.get("authorization");
@@ -13,7 +23,8 @@ export async function GET(request: Request) {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
     
-    const userId = Number(payload.id);
+    // Pastikan userId sesuai dengan tipe di Database (BigInt vs Number)
+    const userId = BigInt(payload.id as string); 
     const userRole = payload.role as string;
 
     let userData = null;
@@ -28,18 +39,10 @@ export async function GET(request: Request) {
           no_telp: true,
           foto: true,
           url_ktp: true,
-          alamat1: true,
-          kota1: true,
-          propinsi1: true,
-          kodepos1: true,
-          alamat2: true,
-          kota2: true,
-          propinsi2: true,
-          kodepos2: true,
-          alamat3: true,
-          kota3: true,
-          propinsi3: true,
-          kodepos3: true,
+          // Alamat lengkap kamu sudah di-select di sini
+          alamat1: true, kota1: true, propinsi1: true, kodepos1: true,
+          alamat2: true, kota2: true, propinsi2: true, kodepos2: true,
+          alamat3: true, kota3: true, propinsi3: true, kodepos3: true,
         },
       });
     } else {
@@ -54,12 +57,20 @@ export async function GET(request: Request) {
       });
     }
 
-    return NextResponse.json({
+    if (!userData) {
+      return NextResponse.json({ success: false, message: "User tidak ditemukan" }, { status: 404 });
+    }
+
+    // --- 2. GUNAKAN SERIALIZE DI SINI ---
+    return NextResponse.json(serialize({
       success: true,
       data: userData,
-    });
+    }));
 
   } catch (error: any) {
-    return NextResponse.json({ success: false, message: "Token Expired" }, { status: 401 });
+    console.error("Profile Error:", error.message);
+    // Bedakan error token expired dengan error server lainnya
+    const message = error.name === "JWTExpired" ? "Token Expired" : "Internal Server Error";
+    return NextResponse.json({ success: false, message }, { status: 401 });
   }
 }

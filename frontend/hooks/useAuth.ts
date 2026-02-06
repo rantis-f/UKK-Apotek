@@ -10,10 +10,9 @@ export interface User {
   no_telp?: string;
   foto?: string | null;
   url_ktp?: string | null;
-  alamat1?: string;
-  kota1?: string;
-  propinsi1?: string;
-  kodepos1?: string;
+  alamat1?: string; kota1?: string; propinsi1?: string; kodepos1?: string;
+  alamat2?: string; kota2?: string; propinsi2?: string; kodepos2?: string;
+  alamat3?: string; kota3?: string; propinsi3?: string; kodepos3?: string;
   name?: string;
   jabatan?: string;
 }

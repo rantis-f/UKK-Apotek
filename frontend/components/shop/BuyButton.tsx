@@ -1,20 +1,39 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/hooks/useCart"; // 1. Import useCart
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag } from "lucide-react";
+import { toast } from "sonner"; // Opsional: untuk notifikasi cantik
 
-export default function BuyButton({ productId }: { productId: string }) {
+// Tambahkan prop 'product' agar kita punya data harga, nama, dll.
+export default function BuyButton({ product }: { product: any }) {
   const { user } = useAuth();
+  const { addItem } = useCart(); // 2. Ambil fungsi addItem
   const router = useRouter();
 
   const handleBuy = () => {
     if (!user) {
-      router.push("/login");
-    } else {
-      router.push(`/cart/add/${productId}`);
+      toast.error("Silakan login terlebih dahulu");
+      return router.push("/login");
     }
+
+    // 3. Masukkan ke Zustand (Otak Global)
+    addItem({
+      id: product.id,
+      nama_obat: product.nama_obat,
+      harga: product.harga_jual,
+      image: product.foto1,
+      stok: product.stok,
+      quantity: 1
+    });
+
+    // 4. Feedback ke user
+    toast.success("Berhasil ditambah ke keranjang!");
+
+    // 5. OPSI: Jika ingin "Beli Sekarang" langsung bayar, arahkan ke checkout
+    // router.push("/checkout"); 
   };
 
   return (

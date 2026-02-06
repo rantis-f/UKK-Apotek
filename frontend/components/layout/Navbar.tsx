@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/hooks/useCart";
 import {
     LogOut,
     ShoppingCart,
     User as UserIcon,
-    Bell,
+    ClipboardList, // Ikon baru untuk Order
     Menu,
     X,
     Info,
@@ -27,8 +28,11 @@ import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
     const { user, logout } = useAuth();
+    const { items } = useCart();
     const pathname = usePathname();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
 
     useEffect(() => {
         setIsMobileMenuOpen(false);
@@ -40,16 +44,18 @@ export default function Navbar() {
         return displayName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
     };
 
+    // --- UPDATE NAV LINKS: PROMO -> PESANAN ---
     const navLinks = [
         { name: "Beranda", href: "/", icon: <UserIcon className="w-4 h-4" /> },
         { name: "Obat", href: "/obat", icon: <ShoppingCart className="w-4 h-4" /> },
-        { name: "Promo", href: "/promo", icon: <Bell className="w-4 h-4" /> },
+        { name: "Pesanan", href: "/orders", icon: <ClipboardList className="w-4 h-4" /> },
         { name: "Tentang", href: "/tentang", icon: <Info className="w-4 h-4" /> },
     ];
 
     const checkActive = (href: string) => {
         if (href === "/") return pathname === "/";
         if (href === "/obat") return pathname.startsWith("/obat");
+        if (href === "/orders") return pathname.startsWith("/pelanggan/orders");
         return pathname === href;
     };
 
@@ -94,10 +100,14 @@ export default function Navbar() {
                     {user ? (
                         <>
                             <div className="flex items-center gap-4 text-gray-400 mr-2">
-                                <div className="relative group">
+                                <Link href="/checkout" className="relative group">
                                     <ShoppingCart className="w-5 h-5 group-hover:text-emerald-600 cursor-pointer transition-colors" />
-                                    <span className="absolute -top-2 -right-2 bg-emerald-600 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center border-2 border-white">0</span>
-                                </div>
+                                    {totalItems > 0 && (
+                                        <span className="absolute -top-2 -right-2 bg-emerald-600 text-white text-[10px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white animate-in zoom-in duration-300">
+                                            {totalItems}
+                                        </span>
+                                    )}
+                                </Link>
                             </div>
                             <DropdownMenu>
                                 <DropdownMenuTrigger className="outline-none">
@@ -118,6 +128,7 @@ export default function Navbar() {
                                             <UserIcon className="mr-3 h-4 w-4 text-emerald-500" /> Profile
                                         </Link>
                                     </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
                                     <DropdownMenuItem onClick={logout} className="p-3 rounded-xl cursor-pointer text-red-600 font-bold text-[10px] uppercase tracking-widest focus:bg-red-50">
                                         <LogOut className="mr-3 h-4 w-4" /> Keluar
                                     </DropdownMenuItem>
@@ -141,12 +152,14 @@ export default function Navbar() {
                 </div>
             </div>
 
+            {/* Mobile Menu Overlay */}
             <div
                 className={`fixed inset-0 bg-emerald-950/60 backdrop-blur-sm z-100 transition-opacity duration-300 md:hidden ${isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
                     }`}
                 onClick={() => setIsMobileMenuOpen(false)}
             />
 
+            {/* Mobile Sidebar */}
             <div className={`fixed top-0 left-0 w-75 h-screen bg-emerald-950 text-white shadow-2xl transition-transform duration-500 ease-out md:hidden z-101 overflow-y-auto ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
                 }`}>
                 <div className="p-6 min-h-full flex flex-col">

@@ -59,7 +59,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       items.push(
         { name: "Data Pelanggan", href: "/dashboard/pelanggan", icon: Users },
         { name: "Manajemen User", href: "/dashboard/users", icon: ShieldCheck },
-        { name: "Metode Bayar", href: "/dashboard/metode-bayar", icon: CreditCard }
+        { name: "Metode Bayar", href: "/dashboard/metode-bayar", icon: CreditCard },
+        { name: "Ekspedisi", href: "/dashboard/ekspedisi", icon: Truck }
       );
     }
     items.push({ name: "Daftar Pesanan", href: "/dashboard/pesanan", icon: History });
@@ -71,6 +72,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (segment === "dashboard") return "Overview Statistik";
     if (segment === "obat") return "Katalog Obat";
     if (segment === "kasir") return "Point of Sales";
+    if (segment === "ekspedisi") return "Manajemen Kurir";
     return segment?.replace(/-/g, " ") || "Dashboard";
   };
 

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Truck, Eye, CheckCircle, User, DollarSign, Receipt } from "lucide-react";
 import { StatusBadge } from "./StatusBadge";
 
-export default function OrderTable({ data, onAction, onView }: any) {
+export default function CustomerOrderTable({ data, onAction, onView }: any) {
   if (!data || data.length === 0) return (
     <div className="p-20 text-center flex flex-col items-center opacity-20">
       <Receipt size={40} />
