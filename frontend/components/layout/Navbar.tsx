@@ -49,7 +49,7 @@ export default function Navbar() {
         { name: "Beranda", href: "/", icon: <UserIcon className="w-4 h-4" /> },
         { name: "Obat", href: "/obat", icon: <ShoppingCart className="w-4 h-4" /> },
         { name: "Pesanan", href: "/orders", icon: <ClipboardList className="w-4 h-4" /> },
-        { name: "Tentang", href: "/tentang", icon: <Info className="w-4 h-4" /> },
+        // { name: "Tentang", href: "/tentang", icon: <Info className="w-4 h-4" /> },
     ];
 
     const checkActive = (href: string) => {
